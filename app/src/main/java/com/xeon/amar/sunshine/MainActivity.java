@@ -7,6 +7,8 @@ import android.view.MenuItem;
 
 
 public class MainActivity extends ActionBarActivity {
+    // Main Class for Sunshine App.
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
