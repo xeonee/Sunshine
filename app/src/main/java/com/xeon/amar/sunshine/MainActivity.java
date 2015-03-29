@@ -1,27 +1,30 @@
 package com.xeon.amar.sunshine;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.android.sunshine.app.data.Utility;
+
 
 public class MainActivity extends ActionBarActivity {
     // Main Class for Sunshine App.
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private final String FORECASTFRAGMENT_TAG = "FFTAG";
+    private String mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForcastFragment())
+                    .add(R.id.container, new ForcastFragment(), FORECASTFRAGMENT_TAG)
                     .commit();
         }
     }
@@ -54,9 +57,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void openPreferredLocationInMap(){
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String location = sharedPrefs.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default) );
-
+//        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        String location = sharedPrefs.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default) );
+        String location = Utility.getPreferredLocation(this);
         // Using the URI scheme for showing a location found on a map.  This super-handy
         // intent can is detailed in the "Common Intents" page of Android's developer site:
         // http://developer.android.com/guide/components/intents-common.html#Maps
@@ -71,8 +74,19 @@ public class MainActivity extends ActionBarActivity {
             Log.d(LOG_TAG, "Couldn't call " + location + ", no receiving apps installed!");
         }
 
-
-
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String location = Utility.getPreferredLocation( this );
+        // update the location in our second pane using the fragment manager
+        if (location != null && !location.equals(mLocation)) {
+            ForcastFragment ff = (ForcastFragment)getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
+            if ( null != ff ) {
+                ff.onLocationChanged();
+            }
+            mLocation = location;
+        }
+    }
 }
